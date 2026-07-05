@@ -37,7 +37,26 @@ function Invoke-External([string]$FilePath, [string[]]$Arguments, [string]$Worki
   }
 }
 
+function Invoke-Download([string]$Url, [string]$OutFile) {
+  $attempts = 3
+  for ($attempt = 1; $attempt -le $attempts; $attempt++) {
+    try {
+      Invoke-WebRequest -UseBasicParsing $Url -OutFile $OutFile
+      return
+    }
+    catch {
+      if ($attempt -eq $attempts) {
+        throw
+      }
+      Write-Host "Download failed, retrying ($attempt/$attempts): $Url"
+      Remove-Item -LiteralPath $OutFile -Force -ErrorAction SilentlyContinue
+      Start-Sleep -Seconds (5 * $attempt)
+    }
+  }
+}
+
 Assert-ChildPath $repo $BuildDirectory
+Assert-ChildPath $repo $OutputDirectory
 $stage = Join-Path $BuildDirectory 'package'
 $source = Join-Path $BuildDirectory 'source'
 $downloads = Join-Path $BuildDirectory 'downloads'
@@ -67,9 +86,9 @@ $sqliteArchive = Join-Path $downloads $sqliteArchiveName
 $sqliteSha256 = '090c06c7e3b003e5cf99cbd280b62d13a5fc9a80f7a5836f1ea3485e3cf85890'
 
 Write-Host "Downloading Node.js $nodeVersion..."
-Invoke-WebRequest -UseBasicParsing "$nodeBaseUrl/$nodeArchiveName" -OutFile $nodeArchive
-Invoke-WebRequest -UseBasicParsing "$nodeBaseUrl/SHASUMS256.txt" -OutFile $checksumFile
-Invoke-WebRequest -UseBasicParsing $sqliteArchiveUrl -OutFile $sqliteArchive
+Invoke-Download "$nodeBaseUrl/$nodeArchiveName" $nodeArchive
+Invoke-Download "$nodeBaseUrl/SHASUMS256.txt" $checksumFile
+Invoke-Download $sqliteArchiveUrl $sqliteArchive
 
 $manifestLine = Get-Content -LiteralPath $checksumFile |
   Where-Object { $_ -match [regex]::Escape($nodeArchiveName) } |
