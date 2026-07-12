@@ -57,7 +57,7 @@ export default {
       if (Response.isInstance(auth)) return auth;
       const tokens = db.listPoolTokens();
       return {
-        apiBaseUrl: `${request.headers['x-forwarded-proto'] || 'https'}://${request.headers.host || ''}/v1`,
+        apiBaseUrl: `${request.headers['x-forwarded-proto'] || 'https'}://${request.headers.host || ''}`,
         apiKeyPreview: gatewayApiKeyPreview(),
         poolConfigured: db.isTokenPoolConfigured(),
         totalAccounts: tokens.length,

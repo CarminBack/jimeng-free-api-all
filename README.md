@@ -146,7 +146,7 @@ New API 渠道使用以下参数：
 
 ```text
 类型: OpenAI
-Base URL: https://your-domain.example/v1
+Base URL: https://your-domain.example
 密钥: JIMENG_API_KEY 的值
 模型: jimeng-image-5.0-lite
 ```
