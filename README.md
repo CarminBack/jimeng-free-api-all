@@ -122,6 +122,37 @@
 
 ## 🛠️ Docker 部署
 
+### 号池网关部署
+
+本分支增加了持久化号池与独立网关密钥。生产环境必须配置：
+
+| 环境变量 | 说明 |
+| --- | --- |
+| `JIMENG_API_KEY` | 提供给 New API 或其他客户端的固定 Bearer API Key |
+| `TOKEN_ENCRYPTION_KEY` | 64 位十六进制字符串，用于 AES-256-GCM 加密保存 Session ID |
+| `TZ` | 可选，推荐 `Asia/Shanghai` |
+
+```bash
+cp .env.example .env
+# 修改 .env 后启动
+docker compose up -d
+```
+
+生产 Compose 仅将服务绑定到 `127.0.0.1:8000`，应通过 Caddy 或 Nginx 提供 HTTPS。
+
+管理后台首次打开时创建管理员账号。账号池中的 Session ID 只以掩码展示，并加密存入 `/app/data/jimeng.db`。
+
+New API 渠道使用以下参数：
+
+```text
+类型: OpenAI
+Base URL: https://your-domain.example/v1
+密钥: JIMENG_API_KEY 的值
+模型: jimeng-image-5.0-lite
+```
+
+图片生成接口兼容 OpenAI 的 `size` 与 `quality` 参数：`1792x1024` 映射到 `16:9`，`1024x1792` 映射到 `9:16`，`quality=hd` 映射到 `4k`。
+
 使用预构建镜像一键启动：
 
 ```bash

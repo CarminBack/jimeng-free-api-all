@@ -2,12 +2,10 @@ import _ from 'lodash';
 
 import Request from '@/lib/request/Request.ts';
 import Response from '@/lib/response/Response.ts';
-import { tokenSplit } from '@/api/controllers/core.ts';
+import { recordRequestFailure, recordRequestStart, recordRequestSuccess, requireRequestTokens } from '@/lib/token-pool.ts';
 import { generateVideoWithRetry, DEFAULT_MODEL } from '@/api/controllers/videos.ts';
 import util from '@/lib/util.ts';
 import db from '@/lib/database.ts';
-import APIException from '@/lib/exceptions/APIException.ts';
-import EX from '@/api/consts/exceptions.ts';
 
 export default {
 
@@ -26,13 +24,10 @@ export default {
                 .validate('body.response_format', v => _.isUndefined(v) || _.isString(v))
                 .validate('headers.authorization', _.isString);
 
-            // refresh_token切分
-            const tokens = tokenSplit(request.headers.authorization);
-            if (tokens.length === 0) {
-                throw new APIException(EX.API_REQUEST_PARAMS_INVALID, "Authorization token is empty");
-            }
-            // 随机挑选一个refresh_token
-            const token = _.sample(tokens);
+            const tokens = requireRequestTokens(request.headers.authorization);
+            const selectedToken = tokens[0];
+            const token = selectedToken.token;
+            recordRequestStart(selectedToken);
 
             const {
                 model = DEFAULT_MODEL,
@@ -58,17 +53,24 @@ export default {
             }
 
             // 生成视频
-            const videoUrl = await generateVideoWithRetry(
-                model,
-                prompt,
-                {
-                    ratio,
-                    resolution,
-                    duration,
-                    filePaths
-                },
-                token
-            );
+            let videoUrl: string;
+            try {
+                videoUrl = await generateVideoWithRetry(
+                    model,
+                    prompt,
+                    {
+                        ratio,
+                        resolution,
+                        duration,
+                        filePaths
+                    },
+                    token
+                );
+                recordRequestSuccess(selectedToken);
+            } catch (error) {
+                recordRequestFailure(selectedToken, error);
+                throw error;
+            }
 
             // 记录统计和媒体
             try {

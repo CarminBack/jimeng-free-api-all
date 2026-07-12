@@ -2,11 +2,9 @@ import _ from "lodash";
 
 import Request from "@/lib/request/Request.ts";
 import { DEFAULT_MODEL, generateImagesWithRetry } from "@/api/controllers/images.ts";
-import { tokenSplit } from "@/api/controllers/core.ts";
 import util from "@/lib/util.ts";
 import db from "@/lib/database.ts";
-import APIException from "@/lib/exceptions/APIException.ts";
-import EX from "@/api/consts/exceptions.ts";
+import { recordRequestFailure, recordRequestStart, recordRequestSuccess, requireRequestTokens } from "@/lib/token-pool.ts";
 
 export default {
   prefix: "/v1/images",
@@ -21,15 +19,14 @@ export default {
         .validate("body.resolution", v => _.isUndefined(v) || _.isString(v))
         .validate("body.sample_strength", v => _.isUndefined(v) || _.isFinite(v))
         .validate("body.response_format", v => _.isUndefined(v) || _.isString(v))
+        .validate("body.size", v => _.isUndefined(v) || _.isString(v))
+        .validate("body.quality", v => _.isUndefined(v) || _.isString(v))
         .validate("body.filePath", v => _.isUndefined(v) || _.isString(v))
         .validate("headers.authorization", _.isString);
-      // refresh_token切分
-      const tokens = tokenSplit(request.headers.authorization);
-      if (tokens.length === 0) {
-        throw new APIException(EX.API_REQUEST_PARAMS_INVALID, "Authorization token is empty");
-      }
-      // 随机挑选一个refresh_token
-      const token = _.sample(tokens);
+      const tokens = requireRequestTokens(request.headers.authorization);
+      const selectedToken = tokens[0];
+      const token = selectedToken.token;
+      recordRequestStart(selectedToken);
       const {
         model = DEFAULT_MODEL,
         prompt,
@@ -38,8 +35,18 @@ export default {
         resolution,
         sample_strength: sampleStrength,
         response_format,
+        size,
+        quality,
         filePath: bodyFilePath,
       } = request.body;
+
+      const openAISizeRatios: Record<string, string> = {
+        "1024x1024": "1:1",
+        "1792x1024": "16:9",
+        "1024x1792": "9:16",
+      };
+      const requestedRatio = ratio || openAISizeRatios[size];
+      const requestedResolution = resolution || (quality === "hd" ? "4k" : undefined);
       
       // 处理文件上传 (multipart/form-data)
       let filePath = bodyFilePath;
@@ -55,13 +62,20 @@ export default {
       }
 
       const responseFormat = _.defaultTo(response_format, "url");
-      const imageUrls = await generateImagesWithRetry(model, prompt, {
-        ratio,
-        resolution,
-        sampleStrength,
-        negativePrompt,
-        filePath,
-      }, token);
+      let imageUrls: string[];
+      try {
+        imageUrls = await generateImagesWithRetry(model, prompt, {
+          ratio: requestedRatio,
+          resolution: requestedResolution,
+          sampleStrength,
+          negativePrompt,
+          filePath,
+        }, token);
+        recordRequestSuccess(selectedToken);
+      } catch (error) {
+        recordRequestFailure(selectedToken, error);
+        throw error;
+      }
       
       // 记录统计和媒体
       try {

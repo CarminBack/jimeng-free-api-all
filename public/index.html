@@ -1,940 +1,597 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>即梦 API 管理控制台</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      :root {
-        --bg-primary: #0f0f23;
-        --bg-secondary: #1a1a2e;
-        --bg-card: #16213e;
-        --text-primary: #e4e4e7;
-        --text-secondary: #a1a1aa;
-        --accent: #7c3aed;
-        --accent-hover: #8b5cf6;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --error: #ef4444;
-        --border: #27272a;
-      }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
-        background: var(--bg-primary);
-        color: var(--text-primary);
-        min-height: 100vh;
-      }
-      .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 20px;
-      }
-
-      /* Login/Setup Page */
-      .auth-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-      }
-      .auth-box {
-        background: var(--bg-card);
-        padding: 40px;
-        border-radius: 16px;
-        width: 100%;
-        max-width: 400px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      }
-      .auth-box h1 {
-        text-align: center;
-        margin-bottom: 30px;
-        font-size: 24px;
-        background: linear-gradient(135deg, #7c3aed, #ec4899);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-      .form-group {
-        margin-bottom: 20px;
-      }
-      .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: var(--text-secondary);
-        font-size: 14px;
-      }
-      .form-group input {
-        width: 100%;
-        padding: 12px 16px;
-        background: var(--bg-secondary);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        color: var(--text-primary);
-        font-size: 16px;
-        transition: border-color 0.2s;
-      }
-      .form-group input:focus {
-        outline: none;
-        border-color: var(--accent);
-      }
-      .btn {
-        width: 100%;
-        padding: 14px;
-        background: var(--accent);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s;
-      }
-      .btn:hover {
-        background: var(--accent-hover);
-      }
-      .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .error-msg {
-        color: var(--error);
-        text-align: center;
-        margin-top: 15px;
-        font-size: 14px;
-      }
-
-      /* Dashboard */
-      .dashboard {
-        display: none;
-      }
-      .dashboard.active {
-        display: block;
-      }
-
-      header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid var(--border);
-      }
-      header h1 {
-        font-size: 24px;
-        background: linear-gradient(135deg, #7c3aed, #ec4899);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-      .header-actions {
-        display: flex;
-        gap: 10px;
-      }
-      .header-actions button {
-        padding: 8px 16px;
-        background: var(--bg-card);
-        color: var(--text-secondary);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: all 0.2s;
-      }
-      .header-actions button:hover {
-        border-color: var(--accent);
-        color: var(--text-primary);
-      }
-
-      /* Tabs */
-      .tabs {
-        display: flex;
-        gap: 4px;
-        margin-bottom: 25px;
-        background: var(--bg-secondary);
-        padding: 4px;
-        border-radius: 10px;
-        width: fit-content;
-      }
-      .tab-btn {
-        padding: 10px 24px;
-        background: transparent;
-        color: var(--text-secondary);
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        transition: all 0.2s;
-      }
-      .tab-btn.active {
-        background: var(--accent);
-        color: white;
-      }
-      .tab-btn:hover:not(.active) {
-        color: var(--text-primary);
-      }
-
-      .tab-content {
-        display: none;
-      }
-      .tab-content.active {
-        display: block;
-      }
-
-      /* Stats Cards */
-      .stats-grid {
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Jimeng Pool</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #f3f5f6;
+      --surface: #ffffff;
+      --surface-muted: #eef1f2;
+      --text: #182025;
+      --text-muted: #657078;
+      --border: #d9dfe2;
+      --primary: #167d5a;
+      --primary-hover: #106747;
+      --info: #2563eb;
+      --warning: #b45309;
+      --danger: #b42318;
+      --success-bg: #e8f6ef;
+      --warning-bg: #fff4e5;
+      --danger-bg: #fdefec;
+      --radius: 8px;
+      --shadow: 0 1px 2px rgba(24, 32, 37, .06), 0 8px 24px rgba(24, 32, 37, .05);
+    }
+    html { background: var(--bg); }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100dvh;
+      color: var(--text);
+      background: var(--bg);
+      font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+    button, input, select { font: inherit; letter-spacing: 0; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid rgba(37, 99, 235, .25);
+      outline-offset: 2px;
+    }
+    [hidden] { display: none !important; }
+    .auth-shell {
+      display: grid;
+      place-items: center;
+      min-height: 100dvh;
+      padding: 24px;
+    }
+    .auth-panel {
+      width: min(100%, 420px);
+      padding: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      color: #fff;
+      background: var(--primary);
+      border-radius: 7px;
+      font-weight: 800;
+    }
+    .brand strong { display: block; font-size: 17px; }
+    .brand span { display: block; color: var(--text-muted); font-size: 12px; }
+    .auth-panel h1 { margin: 28px 0 6px; font-size: 24px; }
+    .auth-panel > p { margin: 0 0 24px; color: var(--text-muted); }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; margin-bottom: 7px; font-weight: 650; }
+    .field small { display: block; margin-top: 6px; color: var(--text-muted); }
+    .field input {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 12px;
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    .field input:focus { border-color: var(--info); }
+    .error { min-height: 22px; margin-top: 10px; color: var(--danger); }
+    .btn {
+      min-height: 44px;
+      padding: 9px 15px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-weight: 650;
+      transition: background .18s ease, border-color .18s ease, color .18s ease;
+    }
+    .btn:hover { background: var(--surface-muted); border-color: #bdc6ca; }
+    .btn.primary { color: #fff; background: var(--primary); border-color: var(--primary); }
+    .btn.primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+    .btn.danger { color: var(--danger); }
+    .btn.danger:hover { background: var(--danger-bg); border-color: #e9b7b0; }
+    .btn.small { min-height: 36px; padding: 6px 10px; font-size: 13px; }
+    .btn:disabled { cursor: not-allowed; opacity: .5; }
+    .btn.full { width: 100%; }
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255, 255, 255, .96);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: min(100% - 32px, 1240px);
+      min-height: 70px;
+      margin: auto;
+      gap: 20px;
+    }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .system-state { display: flex; align-items: center; gap: 7px; margin-right: 8px; color: var(--text-muted); font-size: 13px; }
+    .state-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
+    .workspace { width: min(100% - 32px, 1240px); margin: 28px auto 64px; }
+    .page-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+    .page-heading h1 { margin: 0; font-size: 26px; }
+    .page-heading p { margin: 4px 0 0; color: var(--text-muted); }
+    .tabs {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      margin-bottom: 24px;
+      padding-bottom: 1px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      min-width: max-content;
+      min-height: 44px;
+      padding: 10px 16px;
+      color: var(--text-muted);
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      font-weight: 650;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .metric {
+      min-height: 112px;
+      padding: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .metric span { color: var(--text-muted); font-size: 13px; }
+    .metric strong { display: block; margin-top: 9px; font-size: 28px; font-variant-numeric: tabular-nums; }
+    .section {
+      margin-bottom: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 2px rgba(24, 32, 37, .03);
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 60px;
+      padding: 12px 16px;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-header h2 { margin: 0; font-size: 16px; }
+    .section-header p { margin: 2px 0 0; color: var(--text-muted); font-size: 13px; }
+    .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 13px 16px; text-align: left; border-bottom: 1px solid #e8ecee; vertical-align: middle; }
+    th { color: var(--text-muted); background: #fafbfb; font-size: 12px; text-transform: uppercase; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fafcfb; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .badge { display: inline-flex; align-items: center; min-height: 26px; padding: 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .badge.healthy { color: #0f684a; background: var(--success-bg); }
+    .badge.unchecked { color: #6b5a20; background: #f7f1dc; }
+    .badge.invalid, .badge.error { color: var(--danger); background: var(--danger-bg); }
+    .badge.disabled { color: var(--text-muted); background: var(--surface-muted); }
+    .row-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+    .empty { padding: 42px 20px; text-align: center; color: var(--text-muted); }
+    .integration {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .integration > div { padding: 20px; }
+    .integration > div + div { border-left: 1px solid var(--border); }
+    .integration h3 { margin: 0 0 12px; font-size: 15px; }
+    .config-row { display: grid; grid-template-columns: 110px 1fr; gap: 14px; margin: 9px 0; }
+    .config-row span { color: var(--text-muted); }
+    .config-value { overflow-wrap: anywhere; }
+    .callout { padding: 14px 16px; color: #6f3d05; background: var(--warning-bg); border: 1px solid #efd09b; border-radius: 6px; }
+    .logs-toolbar, .media-toolbar { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    select { min-height: 40px; padding: 7px 10px; color: var(--text); background: #fff; border: 1px solid var(--border); border-radius: 6px; }
+    .log-list { max-height: 560px; overflow: auto; padding: 6px 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+    .log-row { display: grid; grid-template-columns: 158px 64px 1fr; gap: 10px; padding: 8px 16px; border-bottom: 1px solid #edf0f1; }
+    .log-row .time { color: var(--text-muted); }
+    .log-row .level { font-weight: 800; }
+    .log-row .level.ERROR { color: var(--danger); }
+    .log-row .level.WARN { color: var(--warning); }
+    .media-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 16px; }
+    .media-item { overflow: hidden; color: inherit; background: #fff; border: 1px solid var(--border); border-radius: 7px; text-decoration: none; }
+    .media-preview { display: grid; place-items: center; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; color: var(--text-muted); background: var(--surface-muted); }
+    .media-meta { padding: 10px 12px; }
+    .media-meta strong { display: block; }
+    .media-meta span { color: var(--text-muted); font-size: 12px; }
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px; border-top: 1px solid var(--border); }
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(19, 27, 31, .52);
+    }
+    .modal.active { display: grid; }
+    .modal-panel { width: min(100%, 480px); background: var(--surface); border-radius: var(--radius); box-shadow: 0 24px 64px rgba(0, 0, 0, .22); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+    .modal-header h2 { margin: 0; font-size: 18px; }
+    .icon-btn { width: 44px; height: 44px; padding: 0; color: var(--text-muted); background: transparent; border: 0; font-size: 24px; }
+    .modal-body { padding: 20px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border); }
+    .toast { position: fixed; right: 20px; bottom: 20px; z-index: 80; max-width: 360px; padding: 12px 16px; color: #fff; background: #263238; border-radius: 6px; box-shadow: var(--shadow); }
+    .toast.error { background: var(--danger); }
+    @media (max-width: 900px) {
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .media-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .integration { grid-template-columns: 1fr; }
+      .integration > div + div { border-top: 1px solid var(--border); border-left: 0; }
+    }
+    @media (max-width: 620px) {
+      .header-inner, .workspace { width: min(100% - 20px, 1240px); }
+      .header-actions .system-state { display: none; }
+      .page-heading { align-items: start; flex-direction: column; }
+      .metrics { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .metric { min-height: 96px; padding: 14px; }
+      .metric strong { font-size: 23px; }
+      .section-header { align-items: flex-start; flex-direction: column; }
+      .section-header .toolbar { width: 100%; }
+      .section-header .toolbar .btn { flex: 1; }
+      .media-grid { grid-template-columns: 1fr; }
+      #panel-pool thead { display: none; }
+      #token-table, #token-table tbody { display: block; }
+      #token-table tr {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-      }
-      .stat-card {
-        background: var(--bg-card);
-        padding: 24px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-      }
-      .stat-card h3 {
-        color: var(--text-secondary);
-        font-size: 13px;
-        font-weight: 500;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      .stat-card .value {
-        font-size: 32px;
-        font-weight: 700;
-        background: linear-gradient(135deg, #7c3aed, #3b82f6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      /* Tables */
-      .table-container {
-        background: var(--bg-card);
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        overflow: hidden;
-        margin-bottom: 25px;
-      }
-      .table-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 20px;
-        border-bottom: 1px solid var(--border);
-      }
-      .table-header h3 {
-        font-size: 16px;
-        font-weight: 600;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      th,
-      td {
-        padding: 14px 20px;
-        text-align: left;
-        border-bottom: 1px solid var(--border);
-      }
-      th {
-        background: var(--bg-secondary);
-        color: var(--text-secondary);
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      td {
-        font-size: 14px;
-      }
-      tr:hover {
-        background: rgba(124, 58, 237, 0.05);
-      }
-
-      /* Logs */
-      .logs-toolbar {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-      }
-      .logs-toolbar select,
-      .logs-toolbar button {
-        padding: 8px 16px;
-        background: var(--bg-card);
-        color: var(--text-primary);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        font-size: 14px;
-        cursor: pointer;
-      }
-      .log-container {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        max-height: 500px;
-        overflow-y: auto;
-      }
-      .log-entry {
-        padding: 10px 16px;
-        border-bottom: 1px solid var(--border);
-        font-family: "Monaco", "Consolas", monospace;
-        font-size: 13px;
-        display: flex;
-        gap: 12px;
-      }
-      .log-entry:last-child {
-        border-bottom: none;
-      }
-      .log-time {
-        color: var(--text-secondary);
-        min-width: 160px;
-      }
-      .log-level {
-        min-width: 50px;
-        font-weight: 600;
-      }
-      .log-level.INFO {
-        color: var(--success);
-      }
-      .log-level.WARN {
-        color: var(--warning);
-      }
-      .log-level.ERROR {
-        color: var(--error);
-      }
-      .log-message {
-        flex: 1;
-        word-break: break-all;
-      }
-
-      /* Media Gallery */
-      .media-filters {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-      .media-filters button {
-        padding: 8px 20px;
-        background: var(--bg-card);
-        color: var(--text-secondary);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .media-filters button.active {
-        background: var(--accent);
-        color: white;
-        border-color: var(--accent);
-      }
-      .media-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 20px;
-      }
-      .media-item {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        overflow: hidden;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-      }
-      .media-item:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      }
-      .media-thumb {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-        background: var(--bg-secondary);
-      }
-      .media-info {
+        grid-template-columns: 1fr 1fr;
         padding: 12px;
+        gap: 4px 12px;
       }
-      .media-info .type {
-        font-size: 11px;
-        color: var(--accent);
-        text-transform: uppercase;
-        margin-bottom: 4px;
+      #token-table td {
+        display: flex;
+        min-width: 0;
+        padding: 8px 4px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        border: 0;
       }
-      .media-info .date {
+      #token-table td::before {
+        content: attr(data-label);
+        color: var(--text-muted);
         font-size: 12px;
-        color: var(--text-secondary);
+        font-weight: 650;
       }
-      .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-      }
-      .pagination button {
-        padding: 8px 16px;
-        background: var(--bg-card);
-        color: var(--text-primary);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        cursor: pointer;
-      }
-      .pagination button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .pagination span {
-        padding: 8px 16px;
-        color: var(--text-secondary);
-      }
-
-      /* Modal */
-      .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-      }
-      .modal.active {
-        display: flex;
-      }
-      .modal-content {
-        background: var(--bg-card);
-        padding: 30px;
-        border-radius: 16px;
-        max-width: 500px;
-        width: 90%;
-      }
-      .modal-content h2 {
-        margin-bottom: 20px;
-      }
-      .modal-close {
-        float: right;
-        background: none;
-        border: none;
-        color: var(--text-secondary);
-        font-size: 24px;
-        cursor: pointer;
-      }
-
-      /* Loading */
-      .loading {
-        text-align: center;
-        padding: 40px;
-        color: var(--text-secondary);
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Auth Pages -->
-    <div id="auth-page" class="auth-container">
-      <div class="auth-box">
-        <h1>🎨 即梦 API 控制台</h1>
-        <div id="setup-form" style="display: none">
-          <p
-            style="
-              text-align: center;
-              color: var(--text-secondary);
-              margin-bottom: 20px;
-            "
-          >
-            首次使用，请设置管理员账号
-          </p>
-          <div class="form-group">
-            <label>用户名</label>
-            <input type="text" id="setup-username" placeholder="设置用户名" />
-          </div>
-          <div class="form-group">
-            <label>密码</label>
-            <input
-              type="password"
-              id="setup-password"
-              placeholder="设置密码（至少6位）"
-            />
-          </div>
-          <button class="btn" onclick="handleSetup()">完成设置</button>
-          <div id="setup-error" class="error-msg"></div>
-        </div>
-        <div id="login-form" style="display: none">
-          <div class="form-group">
-            <label>用户名</label>
-            <input type="text" id="login-username" placeholder="输入用户名" />
-          </div>
-          <div class="form-group">
-            <label>密码</label>
-            <input type="password" id="login-password" placeholder="输入密码" />
-          </div>
-          <button class="btn" onclick="handleLogin()">登 录</button>
-          <div id="login-error" class="error-msg"></div>
-        </div>
+      #token-table td:last-child { grid-column: 1 / -1; }
+      #token-table td:last-child::before { content: ''; }
+      #token-table .row-actions { width: 100%; justify-content: flex-start; }
+      #token-table .row-actions .btn { flex: 1; }
+      .log-row { grid-template-columns: 1fr 55px; }
+      .log-row .message { grid-column: 1 / -1; }
+      .auth-panel { padding: 24px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main id="auth" class="auth-shell">
+    <section class="auth-panel" aria-label="管理员认证">
+      <div class="brand"><div class="brand-mark">JP</div><div><strong>Jimeng Pool</strong><span>API Operations</span></div></div>
+      <div id="setup-form" hidden>
+        <h1 id="setup-title">初始化管理员</h1>
+        <p>创建后台登录账号。</p>
+        <div class="field"><label for="setup-user">用户名</label><input id="setup-user" autocomplete="username"></div>
+        <div class="field"><label for="setup-pass">密码</label><input id="setup-pass" type="password" autocomplete="new-password"><small>至少 12 位</small></div>
+        <button class="btn primary full" id="setup-submit">完成初始化</button>
+        <div class="error" id="setup-error" role="alert"></div>
       </div>
-    </div>
+      <div id="login-form" hidden>
+        <h1 id="login-title">登录控制台</h1>
+        <p>管理账号池与 API 运行状态。</p>
+        <div class="field"><label for="login-user">用户名</label><input id="login-user" autocomplete="username"></div>
+        <div class="field"><label for="login-pass">密码</label><input id="login-pass" type="password" autocomplete="current-password"></div>
+        <button class="btn primary full" id="login-submit">登录</button>
+        <div class="error" id="login-error" role="alert"></div>
+      </div>
+    </section>
+  </main>
 
-    <!-- Dashboard -->
-    <div id="dashboard" class="dashboard container">
-      <header>
-        <h1>🎨 即梦 API 管理控制台</h1>
+  <div id="app" hidden>
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand"><div class="brand-mark">JP</div><div><strong>Jimeng Pool</strong><span>Production Gateway</span></div></div>
         <div class="header-actions">
-          <button onclick="showPasswordModal()">修改密码</button>
-          <button onclick="handleLogout()">退出登录</button>
-        </div>
-      </header>
-
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="stats">📊 统计信息</button>
-        <button class="tab-btn" data-tab="logs">📋 实时日志</button>
-        <button class="tab-btn" data-tab="media">🖼️ 媒体库</button>
-      </div>
-
-      <!-- Stats Tab -->
-      <div id="tab-stats" class="tab-content active">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <h3>总调用次数</h3>
-            <div class="value" id="total-calls">0</div>
-          </div>
-          <div class="stat-card">
-            <h3>总消耗积分</h3>
-            <div class="value" id="total-credits">0</div>
-          </div>
-          <div class="stat-card">
-            <h3>活跃 Key 数</h3>
-            <div class="value" id="active-keys">0</div>
-          </div>
-          <div class="stat-card">
-            <h3>使用模型数</h3>
-            <div class="value" id="models-used">0</div>
-          </div>
-        </div>
-
-        <div class="table-container">
-          <div class="table-header">
-            <h3>API Key 使用统计</h3>
-            <button
-              onclick="loadStats()"
-              style="
-                padding: 6px 12px;
-                background: var(--bg-secondary);
-                border: 1px solid var(--border);
-                border-radius: 4px;
-                color: var(--text-secondary);
-                cursor: pointer;
-              "
-            >
-              刷新
-            </button>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Key</th>
-                <th>调用次数</th>
-                <th>消耗积分</th>
-                <th>剩余积分</th>
-                <th>最后使用</th>
-              </tr>
-            </thead>
-            <tbody id="key-stats-table"></tbody>
-          </table>
-        </div>
-
-        <div class="table-container">
-          <div class="table-header"><h3>模型使用统计</h3></div>
-          <table>
-            <thead>
-              <tr>
-                <th>模型</th>
-                <th>调用次数</th>
-                <th>消耗积分</th>
-              </tr>
-            </thead>
-            <tbody id="model-stats-table"></tbody>
-          </table>
+          <div class="system-state"><span class="state-dot"></span><span>服务在线</span></div>
+          <button class="btn small" id="password-open">修改密码</button>
+          <button class="btn small" id="logout">退出</button>
         </div>
       </div>
+    </header>
 
-      <!-- Logs Tab -->
-      <div id="tab-logs" class="tab-content">
-        <div class="logs-toolbar">
-          <select id="log-level" onchange="loadLogs()">
-            <option value="ALL">全部级别</option>
-            <option value="INFO">INFO</option>
-            <option value="WARN">WARN</option>
-            <option value="ERROR">ERROR</option>
-          </select>
-          <button onclick="loadLogs()">🔄 刷新</button>
-          <button onclick="clearLogs()">🗑️ 清理日志</button>
-          <button onclick="exportLogs()">📥 导出</button>
+    <main class="workspace">
+      <div class="page-heading"><div><h1>运行控制台</h1><p>账号状态、调用记录与网关接入。</p></div><button class="btn" id="refresh-active">刷新当前页</button></div>
+      <nav class="tabs" aria-label="控制台导航">
+        <button class="tab active" data-tab="overview">概览</button>
+        <button class="tab" data-tab="pool">账号池</button>
+        <button class="tab" data-tab="logs">日志</button>
+        <button class="tab" data-tab="media">媒体</button>
+        <button class="tab" data-tab="integration">接入配置</button>
+      </nav>
+
+      <section id="panel-overview" class="tab-panel active">
+        <div class="metrics">
+          <div class="metric"><span>总调用</span><strong id="metric-calls">0</strong></div>
+          <div class="metric"><span>启用账号</span><strong id="metric-enabled">0</strong></div>
+          <div class="metric"><span>健康账号</span><strong id="metric-healthy">0</strong></div>
+          <div class="metric"><span>已用模型</span><strong id="metric-models">0</strong></div>
         </div>
-        <div class="log-container" id="log-container">
-          <div class="loading">加载中...</div>
+        <div class="section">
+          <div class="section-header"><div><h2>模型调用</h2><p>按模型汇总当前数据库记录。</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>模型</th><th>调用次数</th><th>积分记录</th></tr></thead><tbody id="model-stats"></tbody></table></div>
         </div>
-      </div>
+      </section>
 
-      <!-- Media Tab -->
-      <div id="tab-media" class="tab-content">
-        <div class="media-filters">
-          <button class="active" data-type="">全部</button>
-          <button data-type="image">图片</button>
-          <button data-type="video">视频</button>
+      <section id="panel-pool" class="tab-panel">
+        <div class="section">
+          <div class="section-header"><div><h2>即梦账号池</h2><p>Session ID 加密保存，生成请求按最久未使用账号轮换。</p></div><div class="toolbar"><button class="btn" id="check-all">检测全部</button><button class="btn primary" id="token-open">添加账号</button></div></div>
+          <div class="table-wrap"><table><thead><tr><th>账号</th><th>Session</th><th>状态</th><th>积分</th><th>最后检测</th><th>最后使用</th><th></th></tr></thead><tbody id="token-table"></tbody></table></div>
         </div>
-        <div class="media-grid" id="media-grid">
-          <div class="loading">加载中...</div>
+      </section>
+
+      <section id="panel-logs" class="tab-panel">
+        <div class="section">
+          <div class="logs-toolbar"><select id="log-level" aria-label="日志级别"><option value="ALL">全部级别</option><option value="INFO">INFO</option><option value="WARN">WARN</option><option value="ERROR">ERROR</option></select><button class="btn small" id="logs-refresh">刷新</button><button class="btn small danger" id="logs-clear">清空</button></div>
+          <div class="log-list" id="log-list"></div>
         </div>
-        <div class="pagination" id="pagination"></div>
-      </div>
-    </div>
+      </section>
 
-    <!-- Password Modal -->
-    <div id="password-modal" class="modal">
-      <div class="modal-content">
-        <button class="modal-close" onclick="closePasswordModal()">
-          &times;
-        </button>
-        <h2>修改密码</h2>
-        <div class="form-group">
-          <label>新密码</label>
-          <input
-            type="password"
-            id="new-password"
-            placeholder="输入新密码（至少6位）"
-          />
+      <section id="panel-media" class="tab-panel">
+        <div class="section">
+          <div class="media-toolbar"><select id="media-type" aria-label="媒体类型"><option value="">全部媒体</option><option value="image">图片</option><option value="video">视频</option></select><button class="btn small" id="media-refresh">刷新</button></div>
+          <div class="media-grid" id="media-grid"></div>
+          <div class="pagination"><button class="btn small" id="media-prev">上一页</button><span id="media-page">1 / 1</span><button class="btn small" id="media-next">下一页</button></div>
         </div>
-        <button class="btn" onclick="changePassword()">确认修改</button>
-        <div id="password-error" class="error-msg"></div>
-      </div>
-    </div>
+      </section>
 
-    <script>
-      let currentMediaPage = 1;
-      let currentMediaType = "";
-      let autoRefreshInterval;
+      <section id="panel-integration" class="tab-panel">
+        <div class="section">
+          <div class="section-header"><div><h2>New API 接入</h2><p>在 New API 中创建 OpenAI 类型渠道。</p></div></div>
+          <div class="integration">
+            <div><h3>渠道参数</h3><div class="config-row"><span>类型</span><strong>OpenAI</strong></div><div class="config-row"><span>Base URL</span><code class="config-value" id="config-base">-</code></div><div class="config-row"><span>密钥</span><code class="config-value" id="config-key">-</code></div><div class="config-row"><span>模型</span><code class="config-value">jimeng-image-5.0-lite</code></div></div>
+            <div><h3>请求兼容</h3><div class="config-row"><span>接口</span><code class="config-value">POST /v1/images/generations</code></div><div class="config-row"><span>横图</span><code class="config-value">size: 1792x1024</code></div><div class="config-row"><span>竖图</span><code class="config-value">size: 1024x1792</code></div><div class="config-row"><span>高清</span><code class="config-value">quality: hd</code></div></div>
+          </div>
+        </div>
+        <div class="callout" id="config-warning" hidden>服务端尚未配置完整的号池加密密钥或外部 API Key。</div>
+      </section>
+    </main>
+  </div>
 
-      // Check auth status on load
-      async function checkAuth() {
-        try {
-          const res = await fetch("/dashboard/status");
-          const data = await res.json();
+  <div class="modal" id="token-modal" role="dialog" aria-modal="true" aria-labelledby="token-title">
+    <div class="modal-panel"><div class="modal-header"><h2 id="token-title">添加即梦账号</h2><button class="icon-btn" data-close="token-modal" aria-label="关闭">×</button></div><div class="modal-body"><div class="field"><label for="token-name">账号名称</label><input id="token-name" placeholder="例如：主账号 01"></div><div class="field"><label for="token-value">Session ID</label><input id="token-value" type="password" autocomplete="off"><small>国内账号直接填写 sessionid；国际账号保留 us-、hk-、jp- 或 sg- 前缀。</small></div><div class="error" id="token-error" role="alert"></div></div><div class="modal-footer"><button class="btn" data-close="token-modal">取消</button><button class="btn primary" id="token-save">保存账号</button></div></div>
+  </div>
 
-          if (!data.setupComplete) {
-            document.getElementById("setup-form").style.display = "block";
-            document.getElementById("login-form").style.display = "none";
-          } else {
-            document.getElementById("setup-form").style.display = "none";
-            document.getElementById("login-form").style.display = "block";
-            // Try to access dashboard
-            const statsRes = await fetch("/dashboard/stats", { credentials: 'include' });
-            if (statsRes.ok) {
-              showDashboard();
-            }
-          }
-        } catch (e) {
-          console.error(e);
+  <div class="modal" id="password-modal" role="dialog" aria-modal="true" aria-labelledby="password-title">
+    <div class="modal-panel"><div class="modal-header"><h2 id="password-title">修改管理员密码</h2><button class="icon-btn" data-close="password-modal" aria-label="关闭">×</button></div><div class="modal-body"><div class="field"><label for="new-password">新密码</label><input id="new-password" type="password" autocomplete="new-password"><small>至少 12 位</small></div><div class="error" id="password-error" role="alert"></div></div><div class="modal-footer"><button class="btn" data-close="password-modal">取消</button><button class="btn primary" id="password-save">修改密码</button></div></div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script>
+    const state = { activeTab: 'overview', mediaPage: 1, mediaPages: 1 };
+    const $ = id => document.getElementById(id);
+    const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
+
+    async function api(url, options = {}) {
+      const response = await fetch(url, { credentials: 'include', ...options });
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 401) { $('app').hidden = true; $('auth').hidden = false; $('login-form').hidden = false; }
+      if (!response.ok) throw new Error(data.error || data.message || '请求失败');
+      return data;
+    }
+
+    function toast(message, error = false) {
+      const node = $('toast');
+      node.textContent = message;
+      node.className = error ? 'toast error' : 'toast';
+      node.hidden = false;
+      clearTimeout(node.timer);
+      node.timer = setTimeout(() => { node.hidden = true; }, 4000);
+    }
+
+    function setBusy(button, busy) {
+      button.disabled = busy;
+      if (!button.dataset.label) button.dataset.label = button.textContent;
+      button.textContent = busy ? '处理中...' : button.dataset.label;
+    }
+
+    async function init() {
+      try {
+        const status = await api('/dashboard/status');
+        $('setup-form').hidden = status.setupComplete;
+        $('login-form').hidden = !status.setupComplete;
+        if (status.setupComplete) {
+          await api('/dashboard/config');
+          showApp();
         }
-      }
+      } catch (_) {}
+    }
 
-      async function handleSetup() {
-        const username = document.getElementById("setup-username").value;
-        const password = document.getElementById("setup-password").value;
-        const errorEl = document.getElementById("setup-error");
+    function showApp() {
+      $('auth').hidden = true;
+      $('app').hidden = false;
+      refreshTab('overview');
+    }
 
-        try {
-          const res = await fetch("/dashboard/setup", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password }),
-          });
-          const data = await res.json();
-          if (res.ok) {
-            location.reload();
-          } else {
-            errorEl.textContent = data.error || "设置失败";
-          }
-        } catch (e) {
-          errorEl.textContent = "请求失败";
-        }
-      }
-
-      async function handleLogin() {
-        const username = document.getElementById("login-username").value;
-        const password = document.getElementById("login-password").value;
-        const errorEl = document.getElementById("login-error");
-
-        try {
-          const res = await fetch("/dashboard/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password }),
-            credentials: 'include'
-          });
-          const data = await res.json();
-          if (res.ok) {
-            showDashboard();
-          } else {
-            errorEl.textContent = data.error || "登录失败";
-          }
-        } catch (e) {
-          errorEl.textContent = "请求失败";
-        }
-      }
-
-      async function handleLogout() {
-        await fetch("/dashboard/logout", { method: "POST", credentials: 'include' });
+    async function submitSetup() {
+      const button = $('setup-submit');
+      setBusy(button, true); $('setup-error').textContent = '';
+      try {
+        await api('/dashboard/setup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: $('setup-user').value, password: $('setup-pass').value }) });
         location.reload();
-      }
+      } catch (error) { $('setup-error').textContent = error.message; }
+      finally { setBusy(button, false); }
+    }
 
-      function showDashboard() {
-        document.getElementById("auth-page").style.display = "none";
-        document.getElementById("dashboard").classList.add("active");
-        loadStats();
-        startAutoRefresh();
-      }
+    async function submitLogin() {
+      const button = $('login-submit');
+      setBusy(button, true); $('login-error').textContent = '';
+      try {
+        await api('/dashboard/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: $('login-user').value, password: $('login-pass').value }) });
+        showApp();
+      } catch (error) { $('login-error').textContent = error.message; }
+      finally { setBusy(button, false); }
+    }
 
-      function startAutoRefresh() {
-        autoRefreshInterval = setInterval(() => {
-          const activeTab =
-            document.querySelector(".tab-btn.active").dataset.tab;
-          if (activeTab === "stats") loadStats();
-          else if (activeTab === "logs") loadLogs();
-        }, 10000);
-      }
+    async function loadOverview() {
+      const [stats, config] = await Promise.all([api('/dashboard/stats'), api('/dashboard/config')]);
+      $('metric-calls').textContent = stats.totals?.total_calls || 0;
+      $('metric-enabled').textContent = config.enabledAccounts || 0;
+      $('metric-healthy').textContent = config.healthyAccounts || 0;
+      $('metric-models').textContent = stats.modelStats?.length || 0;
+      $('model-stats').innerHTML = stats.modelStats?.length ? stats.modelStats.map(item => `<tr><td><code>${escapeHtml(item.model)}</code></td><td>${item.total_calls}</td><td>${item.total_credits || 0}</td></tr>`).join('') : '<tr><td colspan="3" class="empty">暂无调用记录</td></tr>';
+    }
 
-      // Tab switching
-      document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".tab-btn")
-            .forEach((b) => b.classList.remove("active"));
-          document
-            .querySelectorAll(".tab-content")
-            .forEach((c) => c.classList.remove("active"));
-          btn.classList.add("active");
-          document
-            .getElementById("tab-" + btn.dataset.tab)
-            .classList.add("active");
+    const statusLabel = { healthy: '健康', invalid: '失效', error: '异常', unchecked: '未检测' };
+    async function loadPool() {
+      const tokens = await api('/dashboard/tokens');
+      $('token-table').innerHTML = tokens.length ? tokens.map(token => {
+        const status = token.enabled ? token.status : 'disabled';
+        return `<tr><td data-label="账号"><strong>${escapeHtml(token.name)}</strong></td><td data-label="Session"><code>${escapeHtml(token.token_preview)}</code></td><td data-label="状态"><span class="badge ${status}">${token.enabled ? (statusLabel[token.status] || token.status) : '已停用'}</span></td><td data-label="积分">${token.points ?? '-'}</td><td data-label="最后检测">${escapeHtml(token.last_checked || '-')}</td><td data-label="最后使用">${escapeHtml(token.last_used || '-')}</td><td><div class="row-actions"><button class="btn small" onclick="checkToken(${token.id}, this)">检测</button><button class="btn small" onclick="toggleToken(${token.id}, ${!Boolean(token.enabled)})">${token.enabled ? '停用' : '启用'}</button><button class="btn small danger" onclick="removeToken(${token.id})">删除</button></div></td></tr>`;
+      }).join('') : '<tr><td colspan="7" class="empty">账号池为空，请添加第一个即梦账号</td></tr>';
+    }
 
-          if (btn.dataset.tab === "logs") loadLogs();
-          else if (btn.dataset.tab === "media") loadMedia();
-        });
-      });
+    async function saveToken() {
+      const button = $('token-save'); setBusy(button, true); $('token-error').textContent = '';
+      try {
+        await api('/dashboard/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: $('token-name').value, token: $('token-value').value }) });
+        closeModal('token-modal'); $('token-name').value = ''; $('token-value').value = ''; toast('账号已加入号池'); await loadPool();
+      } catch (error) { $('token-error').textContent = error.message; }
+      finally { setBusy(button, false); }
+    }
 
-      // Stats
-      async function loadStats() {
-        try {
-          const res = await fetch("/dashboard/stats", { credentials: 'include' });
-          if (!res.ok) return;
-          const data = await res.json();
+    async function checkToken(id, button) {
+      setBusy(button, true);
+      try { const result = await api(`/dashboard/tokens/${id}/check`, { method: 'POST' }); toast(result.live ? `检测通过，剩余积分 ${result.points ?? '-'}` : 'Session 已失效', !result.live); await loadPool(); }
+      catch (error) { toast(error.message, true); }
+      finally { setBusy(button, false); }
+    }
 
-          document.getElementById("total-calls").textContent =
-            data.totals?.total_calls || 0;
-          document.getElementById("total-credits").textContent =
-            data.totals?.total_credits || 0;
-          document.getElementById("active-keys").textContent =
-            data.keyStats?.length || 0;
-          document.getElementById("models-used").textContent =
-            data.modelStats?.length || 0;
+    async function checkAll() {
+      const button = $('check-all'); setBusy(button, true);
+      try { await api('/dashboard/tokens/check-all', { method: 'POST' }); toast('全部账号检测完成'); await loadPool(); }
+      catch (error) { toast(error.message, true); }
+      finally { setBusy(button, false); }
+    }
 
-          // Key stats table
-          const keyTable = document.getElementById("key-stats-table");
-          keyTable.innerHTML =
-            data.keyStats
-              ?.map(
-                (k) => `
-                    <tr>
-                        <td><code>${k.key_preview}</code></td>
-                        <td>${k.total_calls}</td>
-                        <td>${k.total_credits}</td>
-                        <td>${k.remaining_credits || 0}</td>
-                        <td>${k.last_used || "-"}</td>
-                    </tr>
-                `
-              )
-              .join("") ||
-            '<tr><td colspan="5" style="text-align:center;color:var(--text-secondary)">暂无数据</td></tr>';
+    async function toggleToken(id, enabled) {
+      try { await api(`/dashboard/tokens/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) }); await loadPool(); }
+      catch (error) { toast(error.message, true); }
+    }
 
-          // Model stats table
-          const modelTable = document.getElementById("model-stats-table");
-          modelTable.innerHTML =
-            data.modelStats
-              ?.map(
-                (m) => `
-                    <tr>
-                        <td>${m.model}</td>
-                        <td>${m.total_calls}</td>
-                        <td>${m.total_credits}</td>
-                    </tr>
-                `
-              )
-              .join("") ||
-            '<tr><td colspan="3" style="text-align:center;color:var(--text-secondary)">暂无数据</td></tr>';
-        } catch (e) {
-          console.error(e);
-        }
-      }
+    async function removeToken(id) {
+      if (!confirm('确定删除这个账号吗？')) return;
+      try { await api(`/dashboard/tokens/${id}`, { method: 'DELETE' }); toast('账号已删除'); await loadPool(); }
+      catch (error) { toast(error.message, true); }
+    }
 
-      // Logs
-      async function loadLogs() {
-        const level = document.getElementById("log-level").value;
-        try {
-          const res = await fetch(`/dashboard/logs?level=${level}&limit=200`, { credentials: 'include' });
-          if (!res.ok) return;
-          const logs = await res.json();
+    async function loadLogs() {
+      const logs = await api(`/dashboard/logs?level=${encodeURIComponent($('log-level').value)}&limit=200`);
+      $('log-list').innerHTML = logs.length ? logs.map(log => `<div class="log-row"><span class="time">${escapeHtml(log.created_at)}</span><span class="level ${escapeHtml(log.level)}">${escapeHtml(log.level)}</span><span class="message">${escapeHtml(log.message)}</span></div>`).join('') : '<div class="empty">暂无日志</div>';
+    }
 
-          const container = document.getElementById("log-container");
-          container.innerHTML =
-            logs
-              .map(
-                (log) => `
-                    <div class="log-entry">
-                        <span class="log-time">${log.created_at}</span>
-                        <span class="log-level ${log.level}">${log.level}</span>
-                        <span class="log-message">${escapeHtml(
-                          log.message
-                        )}</span>
-                    </div>
-                `
-              )
-              .join("") || '<div class="loading">暂无日志</div>';
-        } catch (e) {
-          console.error(e);
-        }
-      }
+    async function clearLogs() {
+      if (!confirm('确定清空全部日志吗？')) return;
+      await api('/dashboard/logs', { method: 'DELETE' }); await loadLogs(); toast('日志已清空');
+    }
 
-      async function clearLogs() {
-        if (!confirm("确定要清理所有日志吗？")) return;
-        await fetch("/dashboard/logs", { method: "DELETE", credentials: 'include' });
-        loadLogs();
-      }
+    async function loadMedia() {
+      const type = $('media-type').value;
+      const data = await api(`/dashboard/media?page=${state.mediaPage}&limit=20${type ? `&type=${type}` : ''}`);
+      state.mediaPages = data.totalPages || 1;
+      $('media-page').textContent = `${data.page} / ${state.mediaPages}`;
+      $('media-prev').disabled = data.page <= 1;
+      $('media-next').disabled = data.page >= state.mediaPages;
+      $('media-grid').innerHTML = data.items.length ? data.items.map(item => {
+        const preview = item.type === 'image'
+          ? `<img src="${escapeHtml(item.url)}" alt="生成图片" class="media-preview">`
+          : '<div class="media-preview">打开视频</div>';
+        return `<a class="media-item" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${preview}<div class="media-meta"><strong>${item.type === 'image' ? '图片' : '视频'}</strong><span>${escapeHtml(item.created_at)}</span></div></a>`;
+      }).join('') : '<div class="empty">暂无媒体记录</div>';
+    }
 
-      function exportLogs() {
-        const container = document.getElementById("log-container");
-        const text = container.innerText;
-        const blob = new Blob([text], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `jimeng-logs-${new Date().toISOString().slice(0, 10)}.txt`;
-        a.click();
-      }
+    async function loadIntegration() {
+      const config = await api('/dashboard/config');
+      $('config-base').textContent = config.apiBaseUrl || '-';
+      $('config-key').textContent = config.apiKeyPreview || '未配置';
+      $('config-warning').hidden = config.poolConfigured;
+    }
 
-      // Media
-      document.querySelectorAll(".media-filters button").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".media-filters button")
-            .forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-          currentMediaType = btn.dataset.type;
-          currentMediaPage = 1;
-          loadMedia();
-        });
-      });
+    async function refreshTab(tab = state.activeTab) {
+      try {
+        if (tab === 'overview') await loadOverview();
+        if (tab === 'pool') await loadPool();
+        if (tab === 'logs') await loadLogs();
+        if (tab === 'media') await loadMedia();
+        if (tab === 'integration') await loadIntegration();
+      } catch (error) { toast(error.message, true); }
+    }
 
-      async function loadMedia() {
-        try {
-          const url = `/dashboard/media?page=${currentMediaPage}&limit=20${
-            currentMediaType ? "&type=" + currentMediaType : ""
-          }`;
-          const res = await fetch(url, { credentials: 'include' });
-          if (!res.ok) return;
-          const data = await res.json();
+    function openModal(id) { $(id).classList.add('active'); $(id).querySelector('input')?.focus(); }
+    function closeModal(id) { $(id).classList.remove('active'); }
 
-          const grid = document.getElementById("media-grid");
-          if (data.items.length === 0) {
-            grid.innerHTML = '<div class="loading">暂无媒体</div>';
-          } else {
-            grid.innerHTML = data.items
-              .map(
-                (item) => `
-                        <div class="media-item" onclick="window.open('${
-                          item.url
-                        }', '_blank')">
-                            ${item.type === "image" 
-                              ? `<img class="media-thumb" src="${item.url}" onerror="this.style.background='var(--bg-secondary)'" alt="图片">`
-                              : `<div class="media-thumb" style="display:flex;align-items:center;justify-content:center;background:var(--bg-secondary);color:var(--text-secondary);font-size:32px;">🎬</div>`
-                            }
-                            <div class="media-info">
-                                <div class="type">${
-                                  item.type === "image" ? "图片" : "视频"
-                                }</div>
-                                <div class="date">${item.created_at}</div>
-                            </div>
-                        </div>
-                    `
-              )
-              .join("");
-          }
+    async function changePassword() {
+      const button = $('password-save'); setBusy(button, true); $('password-error').textContent = '';
+      try { await api('/dashboard/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ newPassword: $('new-password').value }) }); closeModal('password-modal'); $('new-password').value = ''; toast('密码已修改'); }
+      catch (error) { $('password-error').textContent = error.message; }
+      finally { setBusy(button, false); }
+    }
 
-          // Pagination
-          const pagination = document.getElementById("pagination");
-          pagination.innerHTML = `
-                    <button ${
-                      data.page <= 1 ? "disabled" : ""
-                    } onclick="changePage(${data.page - 1})">上一页</button>
-                    <span>${data.page} / ${data.totalPages || 1}</span>
-                    <button ${
-                      data.page >= data.totalPages ? "disabled" : ""
-                    } onclick="changePage(${data.page + 1})">下一页</button>
-                `;
-        } catch (e) {
-          console.error(e);
-        }
-      }
-
-      function changePage(page) {
-        currentMediaPage = page;
-        loadMedia();
-      }
-
-      // Password
-      function showPasswordModal() {
-        document.getElementById("password-modal").classList.add("active");
-      }
-      function closePasswordModal() {
-        document.getElementById("password-modal").classList.remove("active");
-      }
-      async function changePassword() {
-        const newPassword = document.getElementById("new-password").value;
-        const errorEl = document.getElementById("password-error");
-        try {
-          const res = await fetch("/dashboard/password", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ newPassword }),
-            credentials: 'include'
-          });
-          const data = await res.json();
-          if (res.ok) {
-            alert("密码修改成功");
-            closePasswordModal();
-          } else {
-            errorEl.textContent = data.error;
-          }
-        } catch (e) {
-          errorEl.textContent = "请求失败";
-        }
-      }
-
-      function escapeHtml(str) {
-        const div = document.createElement("div");
-        div.textContent = str;
-        return div.innerHTML;
-      }
-
-      // Init
-      checkAuth();
-    </script>
-  </body>
+    document.querySelectorAll('.tab').forEach(button => button.addEventListener('click', () => {
+      state.activeTab = button.dataset.tab;
+      document.querySelectorAll('.tab').forEach(item => item.classList.toggle('active', item === button));
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === `panel-${state.activeTab}`));
+      refreshTab();
+    }));
+    document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => closeModal(button.dataset.close)));
+    document.querySelectorAll('.modal').forEach(modal => modal.addEventListener('click', event => { if (event.target === modal) closeModal(modal.id); }));
+    $('setup-submit').addEventListener('click', submitSetup);
+    $('login-submit').addEventListener('click', submitLogin);
+    $('login-pass').addEventListener('keydown', event => { if (event.key === 'Enter') submitLogin(); });
+    $('logout').addEventListener('click', async () => { await api('/dashboard/logout', { method: 'POST' }); location.reload(); });
+    $('refresh-active').addEventListener('click', () => refreshTab());
+    $('token-open').addEventListener('click', () => openModal('token-modal'));
+    $('token-save').addEventListener('click', saveToken);
+    $('check-all').addEventListener('click', checkAll);
+    $('logs-refresh').addEventListener('click', loadLogs);
+    $('logs-clear').addEventListener('click', clearLogs);
+    $('log-level').addEventListener('change', loadLogs);
+    $('media-refresh').addEventListener('click', loadMedia);
+    $('media-type').addEventListener('change', () => { state.mediaPage = 1; loadMedia(); });
+    $('media-prev').addEventListener('click', () => { if (state.mediaPage > 1) { state.mediaPage--; loadMedia(); } });
+    $('media-next').addEventListener('click', () => { if (state.mediaPage < state.mediaPages) { state.mediaPage++; loadMedia(); } });
+    $('password-open').addEventListener('click', () => openModal('password-modal'));
+    $('password-save').addEventListener('click', changePassword);
+    init();
+  </script>
+</body>
 </html>

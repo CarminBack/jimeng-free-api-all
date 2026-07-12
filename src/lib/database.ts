@@ -64,6 +64,23 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now', 'localtime'))
   );
 
+  -- 即梦账号池。Token 使用 AES-256-GCM 加密，列表接口只返回掩码。
+  CREATE TABLE IF NOT EXISTS pool_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    token_encrypted TEXT NOT NULL,
+    token_preview TEXT NOT NULL,
+    enabled INTEGER NOT NULL DEFAULT 1,
+    status TEXT NOT NULL DEFAULT 'unchecked',
+    points INTEGER,
+    failure_count INTEGER NOT NULL DEFAULT 0,
+    last_error TEXT,
+    last_checked TEXT,
+    last_used TEXT,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+  );
+
   -- 创建索引
   CREATE INDEX IF NOT EXISTS idx_key_stats_key ON key_stats(key_hash);
   CREATE INDEX IF NOT EXISTS idx_media_created ON media(created_at DESC);
@@ -73,7 +90,9 @@ db.exec(`
 
 // 密码哈希
 export function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password).digest('hex');
+  const salt = crypto.randomBytes(16);
+  const hash = crypto.scryptSync(password, salt, 64);
+  return `scrypt$${salt.toString('hex')}$${hash.toString('hex')}`;
 }
 
 // 生成Session ID
@@ -105,10 +124,20 @@ export function createUser(username: string, password: string): void {
 
 export function validateUser(username: string, password: string): number | null {
   const user = db.prepare('SELECT id, password_hash FROM users WHERE username = ?').get(username) as { id: number; password_hash: string } | undefined;
-  if (user && user.password_hash === hashPassword(password)) {
-    return user.id;
+  if (!user) return null;
+
+  const [scheme, saltHex, hashHex] = user.password_hash.split('$');
+  if (scheme === 'scrypt' && saltHex && hashHex) {
+    const expected = Buffer.from(hashHex, 'hex');
+    const actual = crypto.scryptSync(password, Buffer.from(saltHex, 'hex'), expected.length);
+    return crypto.timingSafeEqual(actual, expected) ? user.id : null;
   }
-  return null;
+
+  // Migrate accounts created by older releases after a successful login.
+  const legacyHash = crypto.createHash('sha256').update(password).digest('hex');
+  if (legacyHash !== user.password_hash) return null;
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hashPassword(password), user.id);
+  return user.id;
 }
 
 export function changePassword(userId: number, newPassword: string): void {
@@ -248,6 +277,151 @@ export function clearLogs(): void {
   db.prepare('DELETE FROM logs').run();
 }
 
+// ==================== 即梦账号池 ====================
+
+export type PoolToken = {
+  id: number;
+  name: string;
+  token_preview: string;
+  enabled: number;
+  status: string;
+  points: number | null;
+  failure_count: number;
+  last_error: string | null;
+  last_checked: string | null;
+  last_used: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+function tokenEncryptionKey(): Buffer {
+  const value = process.env.TOKEN_ENCRYPTION_KEY || '';
+  if (!/^[a-f0-9]{64}$/i.test(value)) {
+    throw new Error('TOKEN_ENCRYPTION_KEY must be a 64-character hexadecimal value');
+  }
+  return Buffer.from(value, 'hex');
+}
+
+function encryptToken(token: string): string {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', tokenEncryptionKey(), iv);
+  const encrypted = Buffer.concat([cipher.update(token, 'utf8'), cipher.final()]);
+  return [iv, cipher.getAuthTag(), encrypted].map(value => value.toString('base64url')).join('.');
+}
+
+function decryptToken(payload: string): string {
+  const [ivValue, tagValue, encryptedValue] = payload.split('.');
+  if (!ivValue || !tagValue || !encryptedValue) throw new Error('Invalid encrypted token');
+  const decipher = crypto.createDecipheriv(
+    'aes-256-gcm',
+    tokenEncryptionKey(),
+    Buffer.from(ivValue, 'base64url')
+  );
+  decipher.setAuthTag(Buffer.from(tagValue, 'base64url'));
+  return Buffer.concat([
+    decipher.update(Buffer.from(encryptedValue, 'base64url')),
+    decipher.final()
+  ]).toString('utf8');
+}
+
+export function isTokenPoolConfigured(): boolean {
+  return /^[a-f0-9]{64}$/i.test(process.env.TOKEN_ENCRYPTION_KEY || '') &&
+    Boolean(process.env.JIMENG_API_KEY);
+}
+
+export function listPoolTokens(): PoolToken[] {
+  return db.prepare(`
+    SELECT id, name, token_preview, enabled, status, points, failure_count,
+           last_error, last_checked, last_used, created_at, updated_at
+    FROM pool_tokens ORDER BY enabled DESC, id ASC
+  `).all() as PoolToken[];
+}
+
+export function addPoolToken(name: string, token: string): number {
+  const result = db.prepare(`
+    INSERT INTO pool_tokens (name, token_encrypted, token_preview)
+    VALUES (?, ?, ?)
+  `).run(name.trim(), encryptToken(token.trim()), keyPreview(token.trim()));
+  return Number(result.lastInsertRowid);
+}
+
+export function updatePoolToken(id: number, values: { name?: string; token?: string; enabled?: boolean }): boolean {
+  const current = db.prepare('SELECT id FROM pool_tokens WHERE id = ?').get(id);
+  if (!current) return false;
+  if (typeof values.name === 'string') {
+    db.prepare(`UPDATE pool_tokens SET name = ?, updated_at = datetime('now', 'localtime') WHERE id = ?`)
+      .run(values.name.trim(), id);
+  }
+  if (typeof values.token === 'string' && values.token.trim()) {
+    const token = values.token.trim();
+    db.prepare(`
+      UPDATE pool_tokens
+      SET token_encrypted = ?, token_preview = ?, status = 'unchecked', points = NULL,
+          failure_count = 0, last_error = NULL, updated_at = datetime('now', 'localtime')
+      WHERE id = ?
+    `).run(encryptToken(token), keyPreview(token), id);
+  }
+  if (typeof values.enabled === 'boolean') {
+    db.prepare(`UPDATE pool_tokens SET enabled = ?, updated_at = datetime('now', 'localtime') WHERE id = ?`)
+      .run(values.enabled ? 1 : 0, id);
+  }
+  return true;
+}
+
+export function deletePoolToken(id: number): boolean {
+  return db.prepare('DELETE FROM pool_tokens WHERE id = ?').run(id).changes > 0;
+}
+
+export function getPoolTokenSecret(id: number): string | null {
+  const row = db.prepare('SELECT token_encrypted FROM pool_tokens WHERE id = ?').get(id) as { token_encrypted: string } | undefined;
+  return row ? decryptToken(row.token_encrypted) : null;
+}
+
+export function getPoolTokensForUse(): Array<{ id: number; token: string }> {
+  const rows = db.prepare(`
+    SELECT id, token_encrypted FROM pool_tokens
+    WHERE enabled = 1 AND status != 'invalid'
+    ORDER BY CASE WHEN last_used IS NULL THEN 0 ELSE 1 END, last_used ASC, id ASC
+  `).all() as Array<{ id: number; token_encrypted: string }>;
+  return rows.map(row => ({ id: row.id, token: decryptToken(row.token_encrypted) }));
+}
+
+export function markPoolTokenUsed(id: number): void {
+  db.prepare(`
+    UPDATE pool_tokens
+    SET status = 'healthy', failure_count = 0,
+        last_error = NULL, updated_at = datetime('now', 'localtime')
+    WHERE id = ?
+  `).run(id);
+}
+
+export function reservePoolToken(id: number): void {
+  db.prepare(`
+    UPDATE pool_tokens
+    SET last_used = datetime('now', 'localtime'), updated_at = datetime('now', 'localtime')
+    WHERE id = ?
+  `).run(id);
+}
+
+export function markPoolTokenFailure(id: number, error: string): void {
+  db.prepare(`
+    UPDATE pool_tokens
+    SET status = 'error', failure_count = failure_count + 1, last_error = ?,
+        updated_at = datetime('now', 'localtime')
+    WHERE id = ?
+  `).run(error.slice(0, 500), id);
+}
+
+export function recordPoolTokenCheck(id: number, live: boolean, points: number | null, error?: string): void {
+  db.prepare(`
+    UPDATE pool_tokens
+    SET status = ?, points = ?, last_error = ?, last_checked = datetime('now', 'localtime'),
+        failure_count = CASE WHEN ? THEN 0 ELSE failure_count + 1 END,
+        updated_at = datetime('now', 'localtime')
+    WHERE id = ?
+  `).run(live ? 'healthy' : 'invalid', points, error?.slice(0, 500) || null, live ? 1 : 0, id);
+}
+
 export default {
   isSetupComplete,
   createUser,
@@ -262,5 +436,16 @@ export default {
   getMedia,
   addLog,
   getLogs,
-  clearLogs
+  clearLogs,
+  isTokenPoolConfigured,
+  listPoolTokens,
+  addPoolToken,
+  updatePoolToken,
+  deletePoolToken,
+  getPoolTokenSecret,
+  getPoolTokensForUse,
+  reservePoolToken,
+  markPoolTokenUsed,
+  markPoolTokenFailure,
+  recordPoolTokenCheck
 };
